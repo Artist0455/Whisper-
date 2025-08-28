@@ -14,11 +14,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user.username:
         started_users[user.username] = user.id
         welcome_message = (
-            "🤖 **Welcome to WhisperBot!**\n\n"
+            "🤖 **Welcome to Artisthidebot!**\n\n"
             "Aap apne group me kisi bhi user ko **secret message** bhejna chahte ho, "
             "to bas aise likhein:\n\n"
-            "`@whisperbot @username aapka message`\n\n"
-            "Example: `@whisperbot @mithlesh Hello! Ye secret hai!`\n\n"
+            "`@Artisthidebot @username aapka message`\n\n"
+            "Example: `@Artisthidebot @mithlesh Hello! Ye secret hai!`\n\n"
             "Main aapke messages ko **private** me send karunga, agar recipient ne mujhe **/start** kiya ho."
         )
         await update.message.reply_text(welcome_message, parse_mode="Markdown")
@@ -33,7 +33,7 @@ async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     print(f"Received inline query: {inline_query}")
 
     # Updated regex pattern to handle spaces and correct usernames
-    pattern = r"@whisperbot\s+@([a-zA-Z0-9_]+)\s+(.+)"
+    pattern = r"@Artisthidebot\s+@([a-zA-Z0-9_]+)\s+(.+)"
     match = re.match(pattern, inline_query)
 
     if match:
@@ -64,7 +64,7 @@ async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         result = InlineQueryResultArticle(
             id=3,
             title="Invalid Format",
-            input_message_content=InputTextMessageContent("⚠️ Please use the correct format: `@whisperbot @username Your message`")
+            input_message_content=InputTextMessageContent("⚠️ Please use the correct format: `@Artisthidebot @username Your message`")
         )
         await update.inline_query.answer([result])
 
