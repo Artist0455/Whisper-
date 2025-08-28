@@ -35,16 +35,23 @@ async def whisper_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         sender = update.effective_user.username or update.effective_user.first_name
 
+        # Debugging log: Check the 'started_users' dictionary
+        print(f"Started users: {started_users}")
+        print(f"Target username: {target_username}")
+        print(f"Sender: {sender}")
+
+        # Check if the recipient has started the bot
         if target_username in started_users:
+            # Send the whisper message to the target user
             await context.bot.send_message(
                 chat_id=started_users[target_username],
                 text=f"💬 Whisper from @{sender}:\n{message}"
             )
             await update.message.reply_text("✅ Message sent privately!")
         else:
-            await update.message.reply_text(f"❌ @{target_username} ne /start nahi kiya hai.")
+            await update.message.reply_text(f"❌ @{target_username} ne /start nahi kiya hai. Whisper message nahi bheja ja sakta.")
     else:
-        pass
+        await update.message.reply_text("⚠️ Please use the correct format: `@whisperbot @username Your message`")
 
 if __name__ == '__main__':
     app = Application.builder().token(BOT_TOKEN).build()
