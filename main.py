@@ -26,13 +26,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     inline_query = update.inline_query.query
-    # Updated regex pattern
+
+    # Debugging log: Print the query received
+    print(f"Received inline query: {inline_query}")
+    
+    # Updated regex pattern to handle spaces and correct usernames
     pattern = r"@whisperbot\s+@([a-zA-Z0-9_]+)\s+(.+)"
     match = re.match(pattern, inline_query)
     
     if match:
         target_username = match.group(1)
         message = match.group(2)
+
+        # Debugging logs: Check what username and message is extracted
+        print(f"Extracted username: {target_username}")
+        print(f"Message: {message}")
 
         # Check if the recipient has started the bot
         if target_username in started_users:
@@ -43,6 +51,21 @@ async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYP
                 input_message_content=InputTextMessageContent(f"💬 Whisper to @{target_username}: {message}")
             )
             await update.inline_query.answer([result])
+        else:
+            result = InlineQueryResultArticle(
+                id=2,
+                title="Error",
+                input_message_content=InputTextMessageContent(f"❌ @{target_username} ne /start nahi kiya hai. Whisper message nahi bheja ja sakta.")
+            )
+            await update.inline_query.answer([result])
+    else:
+        result = InlineQueryResultArticle(
+            id=3,
+            title="Invalid Format",
+            input_message_content=InputTextMessageContent("⚠️ Please use the correct format: `@whisperbot @username Your message`")
+        )
+        await update.inline_query.answer([result])
+
         else:
             result = InlineQueryResultArticle(
                 id=2,
