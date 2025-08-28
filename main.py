@@ -31,7 +31,7 @@ async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     inline_query = update.inline_query.query
     print(f"Received inline query: {inline_query}")
 
-    pattern = r"@Artisthidebot\s+@([a-zA-Z0-9_]+)\s+(.+)"
+    pattern = r"@Artisthidebot\s+@(\w+)\s+([\s\S]+)"
     match = re.match(pattern, inline_query)
 
     results = []
