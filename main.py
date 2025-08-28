@@ -26,7 +26,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     inline_query = update.inline_query.query
-    match = re.match(r"@whisperbot\s+@(\w+)\s+(.+)", inline_query)
+    # Updated regex pattern
+    pattern = r"@whisperbot\s+@([a-zA-Z0-9_]+)\s+(.+)"
+    match = re.match(pattern, inline_query)
     
     if match:
         target_username = match.group(1)
