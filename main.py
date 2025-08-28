@@ -2,6 +2,7 @@ from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import Application, CommandHandler, InlineQueryHandler, ContextTypes
 import os
 import re
+import uuid  # 👈 unique ID generate karne ke liye
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
@@ -28,54 +29,57 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Inline query handler
 async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     inline_query = update.inline_query.query
-
-    # Debugging log: Print the query received
     print(f"Received inline query: {inline_query}")
 
-    # Updated regex pattern to handle spaces and correct usernames
     pattern = r"@Artisthidebot\s+@([a-zA-Z0-9_]+)\s+(.+)"
     match = re.match(pattern, inline_query)
+
+    results = []
 
     if match:
         target_username = match.group(1)
         message = match.group(2)
+        print(f"Extracted username: {target_username}, Message: {message}")
 
-        # Debugging logs: Check what username and message is extracted
-        print(f"Extracted username: {target_username}")
-        print(f"Message: {message}")
-
-        # Check if the recipient has started the bot
         if target_username in started_users:
-            # Generate inline result
-            result = InlineQueryResultArticle(
-                id=1,
-                title="Send Whisper",
-                input_message_content=InputTextMessageContent(f"💬 Whisper to @{target_username}: {message}")
+            results.append(
+                InlineQueryResultArticle(
+                    id=str(uuid.uuid4()),   # 👈 unique ID
+                    title="Send Whisper",
+                    description=f"Send secret message to @{target_username}",
+                    input_message_content=InputTextMessageContent(
+                        f"💬 Whisper to @{target_username}: {message}"
+                    )
+                )
             )
-            await update.inline_query.answer([result])
         else:
-            result = InlineQueryResultArticle(
-                id=2,
-                title="Error",
-                input_message_content=InputTextMessageContent(f"❌ @{target_username} ne /start nahi kiya hai. Whisper message nahi bheja ja sakta.")
+            results.append(
+                InlineQueryResultArticle(
+                    id=str(uuid.uuid4()),
+                    title="Error",
+                    description="Recipient has not started the bot",
+                    input_message_content=InputTextMessageContent(
+                        f"❌ @{target_username} ne /start nahi kiya hai. Whisper message nahi bheja ja sakta."
+                    )
+                )
             )
-            await update.inline_query.answer([result])
     else:
-        result = InlineQueryResultArticle(
-            id=3,
-            title="Invalid Format",
-            input_message_content=InputTextMessageContent("⚠️ Please use the correct format: `@Artisthidebot @username Your message`")
+        results.append(
+            InlineQueryResultArticle(
+                id=str(uuid.uuid4()),
+                title="Invalid Format",
+                description="Use @Artisthidebot @username message",
+                input_message_content=InputTextMessageContent(
+                    "⚠️ Please use the correct format: `@Artisthidebot @username Your message`"
+                )
+            )
         )
-        await update.inline_query.answer([result])
+
+    await update.inline_query.answer(results, cache_time=0)  # 👈 fresh result force
 
 if __name__ == '__main__':
-    # Create the application
     app = Application.builder().token(BOT_TOKEN).build()
-
-    # Add handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(InlineQueryHandler(inline_query_handler))
-
-    # Run the bot
     app.run_polling()
     
