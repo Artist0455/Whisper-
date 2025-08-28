@@ -1,7 +1,7 @@
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-import re
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 import os
+import re
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
@@ -39,9 +39,8 @@ async def whisper_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass
 
 if __name__ == '__main__':
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-
+    app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), whisper_handler))
-
     app.run_polling()
+    
