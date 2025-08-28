@@ -12,7 +12,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if user.username:
         started_users[user.username] = user.id
-        await update.message.reply_text("🤖 Whisper bot ready! Ab aapko koi group me secret message bhej sakta hai.")
+        welcome_message = (
+            "🤖 **Welcome to WhisperBot!**\n\n"
+            "Aap apne group me kisi bhi user ko **secret message** bhejna chahte ho, "
+            "to bas aise likhein:\n\n"
+            "`@whisperbot @username aapka message`\n\n"
+            "Example: `@whisperbot @mithlesh Hello! Ye secret hai!`\n\n"
+            "Main aapke messages ko **private** me send karunga, agar recipient ne mujhe **/start** kiya ho."
+        )
+        await update.message.reply_text(welcome_message, parse_mode="Markdown")
     else:
         await update.message.reply_text("❗ Aapka Telegram username set nahi hai.")
 
