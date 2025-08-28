@@ -1,5 +1,5 @@
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import Application, CommandHandler, InlineQueryHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, InlineQueryHandler, ContextTypes
 import os
 import re
 
@@ -8,6 +8,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 # Store users who started bot
 started_users = {}
 
+# /start command handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if user.username:
@@ -24,16 +25,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❗ Aapka Telegram username set nahi hai.")
 
+# Inline query handler
 async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     inline_query = update.inline_query.query
 
     # Debugging log: Print the query received
     print(f"Received inline query: {inline_query}")
-    
+
     # Updated regex pattern to handle spaces and correct usernames
     pattern = r"@whisperbot\s+@([a-zA-Z0-9_]+)\s+(.+)"
     match = re.match(pattern, inline_query)
-    
+
     if match:
         target_username = match.group(1)
         message = match.group(2)
@@ -66,24 +68,14 @@ async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         )
         await update.inline_query.answer([result])
 
-        else:
-            result = InlineQueryResultArticle(
-                id=2,
-                title="Error",
-                input_message_content=InputTextMessageContent(f"❌ @{target_username} ne /start nahi kiya hai. Whisper message nahi bheja ja sakta.")
-            )
-            await update.inline_query.answer([result])
-    else:
-        result = InlineQueryResultArticle(
-            id=3,
-            title="Invalid Format",
-            input_message_content=InputTextMessageContent("⚠️ Please use the correct format: `@whisperbot @username Your message`")
-        )
-        await update.inline_query.answer([result])
-
 if __name__ == '__main__':
+    # Create the application
     app = Application.builder().token(BOT_TOKEN).build()
+
+    # Add handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(InlineQueryHandler(inline_query_handler))
+
+    # Run the bot
     app.run_polling()
     
