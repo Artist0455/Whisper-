@@ -1,5 +1,5 @@
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
+from telegram.ext import Application, CommandHandler, InlineQueryHandler, MessageHandler, filters, ContextTypes
 import os
 import re
 
@@ -24,38 +24,41 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❗ Aapka Telegram username set nahi hai.")
 
-async def whisper_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
-    pattern = r"@whisperbot\s+@(\w+)\s+(.+)"
-    match = re.match(pattern, text)
-
+async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    inline_query = update.inline_query.query
+    match = re.match(r"@whisperbot\s+@(\w+)\s+(.+)", inline_query)
+    
     if match:
         target_username = match.group(1)
         message = match.group(2)
 
-        sender = update.effective_user.username or update.effective_user.first_name
-
-        # Debugging log: Check the 'started_users' dictionary
-        print(f"Started users: {started_users}")
-        print(f"Target username: {target_username}")
-        print(f"Sender: {sender}")
-
         # Check if the recipient has started the bot
         if target_username in started_users:
-            # Send the whisper message to the target user
-            await context.bot.send_message(
-                chat_id=started_users[target_username],
-                text=f"💬 Whisper from @{sender}:\n{message}"
+            # Generate inline result
+            result = InlineQueryResultArticle(
+                id=1,
+                title="Send Whisper",
+                input_message_content=InputTextMessageContent(f"💬 Whisper to @{target_username}: {message}")
             )
-            await update.message.reply_text("✅ Message sent privately!")
+            await update.inline_query.answer([result])
         else:
-            await update.message.reply_text(f"❌ @{target_username} ne /start nahi kiya hai. Whisper message nahi bheja ja sakta.")
+            result = InlineQueryResultArticle(
+                id=2,
+                title="Error",
+                input_message_content=InputTextMessageContent(f"❌ @{target_username} ne /start nahi kiya hai. Whisper message nahi bheja ja sakta.")
+            )
+            await update.inline_query.answer([result])
     else:
-        await update.message.reply_text("⚠️ Please use the correct format: `@whisperbot @username Your message`")
+        result = InlineQueryResultArticle(
+            id=3,
+            title="Invalid Format",
+            input_message_content=InputTextMessageContent("⚠️ Please use the correct format: `@whisperbot @username Your message`")
+        )
+        await update.inline_query.answer([result])
 
 if __name__ == '__main__':
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), whisper_handler))
+    app.add_handler(InlineQueryHandler(inline_query_handler))
     app.run_polling()
     
